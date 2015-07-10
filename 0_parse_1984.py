@@ -1,4 +1,3 @@
-# coding: utf-8
 import aiohttp
 import asyncio
 from io import BytesIO, TextIOWrapper
@@ -8,6 +7,7 @@ import re
 import zipfile
 
 logger = logging.getLogger('parse_1984')
+logger.setLevel(logging.DEBUG)
 
 @asyncio.coroutine
 def get_zip(url):
@@ -97,11 +97,10 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        format=(
-            '%(asctime)s %(levelname).1s '
-            '%(name)s [%(funcName)s:%(lineno)d] %(message)s'
-        ),
-        level=logging.DEBUG
-    )
+    from utils import colorify_log_handler
+    ch = logging.StreamHandler()
+    colorify_log_handler(ch)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
+    root_logger.addHandler(ch)
     main()

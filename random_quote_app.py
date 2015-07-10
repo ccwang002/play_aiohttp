@@ -14,7 +14,7 @@ __version__ = '2015.7'
 define("port", default=9527, help="run on the given port", type=int)
 define("debug", default=False, help="run in debug mode")
 define("num_process", default=1, help="number of processes to fork", type=int)
-define("pickle_pth", default='preprocess/parsed_1984.pkl',
+define("pickle_pth", default='parsed_1984.pkl',
        help='path to the parsed pickle file')
 
 logger = logging.getLogger('random_quote_app')
