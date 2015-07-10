@@ -38,8 +38,14 @@ def quote_many(num_quotes=1, conn_limit=20, progress=None, step=10):
     # For Python 3.4.4+, asyncio.ensure_future(...)
     # will wrap coro as Task and keep input the same
     # if it is already Future.
+    try:
+        coro_to_fut = asyncio.ensure_future
+    except AttributeError:
+        logger.warning('asyncio.ensure_future requires Python 3.4.4+. '
+                       'Fall back to asyncio.async')
+        coro_to_fut = asyncio.async
     futures = [
-        asyncio.ensure_future(quote_with_lock(semaphore))
+        coro_to_fut(quote_with_lock(semaphore))
         for i in range(num_quotes)
     ]
 
