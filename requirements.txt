@@ -1,0 +1,4 @@
+aiohttp>0.16
+colorlog>=2.6
+ipython[all]>2.0
+tornado==4.2
