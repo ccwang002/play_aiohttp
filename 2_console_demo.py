@@ -17,7 +17,7 @@ def quote_with_lock(semaphore, url='http://localhost:5566/quote/uniform'):
                          % (r.reason, r.status))
             r.close(force=True)
             return None
-    quote_json = yield from r.json()
+        quote_json = yield from r.json()
     r.close(force=True)
     return quote_json['quote']
 
