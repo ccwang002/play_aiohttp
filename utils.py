@@ -1,5 +1,34 @@
 import colorlog
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+try:
+    from pip._vendor.progress.bar import ShadyBar  # or IncrementalBar
+except ImportError:
+    # for pip < 6.0, no fancy progressbar is given
+    # We build our own
+    class ShadyBar(object):
+
+        def __init__(self, *args, **kwargs):
+            logger.error('progress bar requires pip 6.0+')
+            self.description = ''
+            self.index = 0
+            self.max = kwargs.get('max', 100)
+
+        def next(self, n=1):
+            self.index += n
+            self.update()
+
+        def update(self):
+            step = self.max // 10 or 1
+            percentage = self.index / self.max * 100
+            if self.index % step == 0:
+                logger.info('Progess %04.1f%% reached' % percentage)
+
+        def finish(self):
+            logger.info('Progress done')
 def colorify_log_handler(
         log_handler, log_lineno=True,
         time_fmt='%y-%m-%d %H:%M:%S', log_fmt=None
@@ -64,3 +93,12 @@ def colorify_log_handler(
         },
     )
     log_handler.setFormatter(log_formatter)
+
+
+class ProgressBar(ShadyBar):
+    message = "%(description)s"
+    suffix = "%(percent).1f%% eta %(eta)s s"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.description = ''
