@@ -391,7 +391,6 @@ for i, coro in enumerate(<mark>asyncio.as_completed(coros)</mark>, 1):
     quotes.append(q)</code></pre>
   </div></section>
 
-
   <section class="slide"><div>
       <h2>考慮執行順序的話 - 方法一</h2>
       <p>自己做一個 callback function <code>progress_adder</code> 負責增加 progress</p>
@@ -414,7 +413,6 @@ for i in range(num_quotes):
 quotes = yield from (asyncio.gather(*futures))</code></pre>
   </div></section>
 
-
   <section class="slide"><div>
       <h2 class="tighter">方法二：包成 Task 呼叫 .result()</h2>
 <pre class="language-python"><code>futures = [
@@ -428,6 +426,24 @@ for i, coro in enumerate(asyncio.as_completed(futures), 1):
 <mark>quotes = [fut.result() for fut in futures]</mark></code></pre>
   </div></section>
 
+
+  <section id="demo-console" class="slide"><div>
+      <h2>Demo: Console Progressbar</h2>
+      <div class="citation">
+        <img src="pics/console_out.gif" alt="Console Progressbar Demo" />
+        <p>Or view it on <a href="http://gfycat.com/OrnateTeemingBlackbear">gfycat</a></p>
+      </div>
+      <p>PS: pip 裡面其實包了各種各樣的 progress bar (<a href="https://github.com/pypa/pip/blob/develop/pip/_vendor/progress/spinner.py">ex. source</a>)</p>
+  </div></section>
+
+  <section id="ipynb-demo" class="slide"><div>
+      <h2>Demo: IPython Notebook Progressbar</h2>
+      <div class="citation">
+        <img src="pics/ipynb_out.gif" alt="IPython Notebook Progressbar Demo" />
+        <p>Or view it on <a href="http://gfycat.com/HastySpryAmericanavocet">gfycat</a></p>
+      </div>
+      <p><code>step</code> 不要設太小，I/O 高且會拖慢速度（最快約 0.1s 更新一次）</p>
+  </div></section>
 
   <!-- End Slide -->
   <section id='end' class='slide cover shout w'><div>
