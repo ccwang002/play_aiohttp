@@ -1,3 +1,9 @@
+"""Random 1984 quote REST API server
+
+Notes
+-----
+More tornado async usage at https://gist.github.com/lbolla/3826189
+"""
 import itertools
 import logging
 import operator
@@ -5,9 +11,11 @@ import pickle
 import random
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
+from tornado import gen
 import tornado.log
 from tornado.options import define, options, parse_command_line
 import tornado.web
+import time
 
 __version__ = '2015.7'
 
@@ -66,11 +74,24 @@ class RootHandler(BaseHandler):
             },
         }
         self.write(response)
+        self.finish()
 
 
 class RandomQuoteHandler(BaseHandler):
 
+    @tornado.web.asynchronous
+    @gen.engine
     def get(self):
+        '''Quote responder.
+
+        If slow is given, wait an extra 0.5 second.
+        '''
+        self.response()
+        if self.get_argument('slow', False):
+            yield gen.Task(IOLoop.current().add_timeout, time.time() + 0.5)
+        self.finish()
+
+    def response(self):
         effective_chapters = self.draw_chapter()
         rand_chp = random.choice(effective_chapters)
         rand_quote = random.choice(self.quotes[rand_chp])
@@ -114,7 +135,7 @@ class RandomQuoteHandler(BaseHandler):
 
 class RandomQuoteUniformHandler(RandomQuoteHandler):
 
-    def get(self):
+    def response(self):
         effective_chapters = self.draw_chapter()
         effecitve_quotes = list(itertools.chain.from_iterable(
             operator.itemgetter(*effective_chapters)(self.quotes)
