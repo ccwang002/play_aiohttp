@@ -43,14 +43,15 @@ def colorify_log_handler(
         >>> logger.addHandler(ch)
 
     """
-    log_fmt = (
-        '%(log_color)s%(asctime)s.%(msecs)d %(levelname).1s%(reset)s '
-    )
-    if log_lineno:
-        log_fmt += '%(cyan)s[%(name)s %(funcName)s:%(lineno)d]%(reset)s '
-    else:
-        log_fmt += '%(cyan)s[%(name)s %(funcName)s]%(reset)s '
-    log_fmt += '%(message)s'
+    if log_fmt is None:
+        log_fmt = (
+            '%(log_color)s%(asctime)s.%(msecs)d %(levelname).1s%(reset)s '
+        )
+        if log_lineno:
+            log_fmt += '%(cyan)s[%(name)s %(funcName)s:%(lineno)d]%(reset)s '
+        else:
+            log_fmt += '%(cyan)s[%(name)s %(funcName)s]%(reset)s '
+        log_fmt += '%(message)s'
     log_formatter = colorlog.ColoredFormatter(
         log_fmt,
         time_fmt,
