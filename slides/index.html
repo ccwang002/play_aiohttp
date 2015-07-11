@@ -476,35 +476,42 @@ for i, fut in enumerate(asyncio.as_completed(futures), 1):
       </ul>
   </div></section>
 
-  <section id="pinkoi-hiring" class="slide cover shout"><div>
+  <section id="pinkoi-hiring" class="slide cover"><div>
+      <img src="pics/pinkoi_hiring.jpg" alt="" />
       <h2><a href="http://www.pinkoi.com/about/pinkoist"><img src="pics/pinkoi.png" alt="Pinkoi"></a>is hiring</h2>
       <p class="job">Back-End | QA | Data | Search<br>Front-End | iOS | Android</p>
   </div>
   <style>
+    #pinkoi-hiring div > img {
+      opacity: 0.9;
+      width: 100%;
+    }
     #pinkoi-hiring h2 img {
       vertical-align: middle;
       position: relative;
-      height: 2em;
-      margin-right: 0.2em;
+      height: 1.8em;
+      margin-right: 0.1em;
     }
     #pinkoi-hiring h2 a {
       background: none;
     }
     #pinkoi-hiring h2 {
       color: #eee;
-      top: 40%;
+      position: absolute;
+      font-size: 130px;
+      bottom: 80px;
+      right: 30px;
     }
     #pinkoi-hiring p {
       position: absolute;
       text-align: right;
-      width: 100%;
-      right: 140px;
       color: #eee;
     }
     #pinkoi-hiring .job {
-      font-size: 34px;
-      line-height: 1.6em;
-      bottom: 16%;
+      font-size: 24px;
+      line-height: 1.5em;
+      bottom: 50px;
+      right: 35px;
     }
   </style>
   </section>
