@@ -152,12 +152,12 @@ with ThreadPoolExecutor(max_workers) as executor:
   <section id="asyncio" class="slide"><div>
     <h2>Event loop / asyncio 是啥？可以吃嗎？</h2>
     <ul>
-      <li>我也是看報紙才知道的。</li>
-      <li>看了</li>
+      <li>可以直接吃，但你會投降 <a class="grey" href="https://www.youtube.com/watch?v=H2KYzeT_lGY">Stop, I yield!</a><span class="grey">（冰火粉覺得好冷）</span></li>
+      <li>我也是看報紙才知道的。看了</li>
        <ul>
         <li>TP 大大 Yield a Tulip <a href="https://speakerdeck.com/uranusjr/yield">投影片</a>（<a href="http://www.pyvideo.org/video/3263/yielding-a-tulip-pycon-apac-2014">影片</a>）</li>
-        <li>Davide Beazley <a href="https://www.youtube.com/watch?v=MCs5OvhV9S4">現場刻一個</a>
-        <br>Python Concurrency From the Ground Up (<a href="https://github.com/dabeaz/concurrencylive">source code</a>)</li>
+        <li>Davide Beazley <a href="https://www.youtube.com/watch?v=MCs5OvhV9S4">現場刻一個</a> (<a href="https://github.com/dabeaz/concurrencylive">source code</a>)
+        <br>Python Concurrency From the Ground Up</li>
         <li>從 <a href="http://asyncio.org/">asyncio 大本營</a>看了<a href="http://sahandsaba.com/understanding-asyncio-node-js-python-3-4.html">有的</a><a href="http://compiletoi.net/fast-scraping-in-python-with-asyncio.html">沒的</a><a href="http://ntoll.org/article/asyncio">大大</a>小小教學</li>
         <li>…（然後進入精神時光屋差不多幾個月）</li>
       </ul>
@@ -177,6 +177,7 @@ with ThreadPoolExecutor(max_workers) as executor:
     <pre class="language-bash"><code>python 0_parse_1984.py
 python random_quote_app.py [--help|--num_process=1]</code></pre>
   </div></section>
+
 <!--"'In memory. Very well, then. We, the Party, control all records, and we
     control all memories. Then we control the past, do we not?'" part3 chp2-->
   <section id="scene-in-action" class="slide"><div>
@@ -261,7 +262,7 @@ quote = <mark>loop.run_until_complete(quote_simple())</mark></code></pre>
   <section id="multi-coro-example" class="slide"><div>
       <h2 class="tighter">多個 requests 情況</h2>
       <p class="tighter">用 <a class="pinkoi" href="https://docs.python.org/3.4/library/asyncio-task.html#asyncio.gather"><code>asyncio.gather(*coro)</code></a>
-      確保多個 coroutines 結束，並依序收集他們的回傳值。
+      同時放入多個 coroutines 進 loop，<br>等他們結束，並依序收集回傳值。
       </p>
       <pre class="language-python"><code>@asyncio.coroutine
 def quote_many(num_quotes=1):
