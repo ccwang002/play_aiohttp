@@ -130,7 +130,7 @@
 <code>from concurrent.futures import ThreadPoolExecutor
 
 def search(query, url='/search'):
-    r = requests.request('GET', url, params={'q': query})
+    r = requests.get(url, params={'q': query})
     quote_json = r.json()
     return quote_json
 
@@ -203,7 +203,7 @@ python random_quote_app.py [--help|--num_process=1]</code></pre>
     <h2>最基本 asyncio 架構：一個 coroutine</h2>
     <pre class="language-python"><code>@asyncio.coroutine
 def quote_simple(url='/quote/uniform'):
-    r = yield from aiohttp.request('GET', url)
+    r = yield from aiohttp.get(url)
     quote_json = yield from r.json()
     return quote_json['quote']
 
@@ -215,8 +215,8 @@ quote = loop.run_until_complete(quote_simple())</code></pre>
   <h2>本來使用 requests 長這樣</h2>
 <pre class="language-python"><code>
 def quote_block(url='/quote/uniform'):
-    r = requests.request('GET', url)
-    quote_json = r.json()
+    r = requests.get(url)  # open connection
+    quote_json = r.json()  # read incoming stream
     return quote_json['quote']
 
 
@@ -227,7 +227,7 @@ quote = quote_block()</code>
     <h2>最基本 asyncio 架構：一個 coroutine</h2>
     <pre class="language-python"><code><mark>@asyncio.coroutine</mark>
 def quote_simple(url='/quote/uniform'):
-    r = <mark>yield from</mark> aiohttp.request('GET', url)
+    r = <mark>yield from</mark> aiohttp.get(url)
     quote_json = <mark>yield from</mark> r.json()
     return quote_json['quote']
 
@@ -239,7 +239,7 @@ quote = loop.run_until_complete(quote_simple())</code></pre>
     <h2>最基本 asyncio 架構：一個 coroutine</h2>
     <pre class="language-python"><code>@asyncio.coroutine
 def quote_simple(url='/quote/uniform'):
-    r = yield from aiohttp.request('GET', url)
+    r = yield from aiohttp.get(url)
     quote_json = yield from r.json()
     return quote_json['quote']
 
@@ -304,7 +304,7 @@ tcp 0 0   127.0.0.1:44741   127.0.0.1:5566   <mark>TIME_WAIT</mark>   -</code></
       <h2>本來的 quote_simple</h2>
       <pre class="language-python"><code>@asyncio.coroutine
 def quote_simple(url='/quote/uniform'):
-    r = yield from aiohttp.request('GET', url)
+    r = yield from aiohttp.get(url)
     quote_json = yield from r.json()
     return quote_json['quote']</code></pre>
   </div></section>
@@ -315,7 +315,7 @@ def quote_simple(url='/quote/uniform'):
       <pre class="language-python"><code>@asyncio.coroutine
 def quote_with_lock(semaphore, url='/quote/uniform'):
     <mark>with (yield from semaphore):</mark>
-        r = yield from aiohttp.request('GET', url)
+        r = yield from aiohttp.get(url)
         quote_json = yield from r.json()
     return quote_json['quote']</code></pre>
   </div></section>
