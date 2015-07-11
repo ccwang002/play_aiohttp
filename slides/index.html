@@ -113,7 +113,7 @@
     </style>
   </section>
 
-  <section class="slide"><div>
+  <section id="background" class="slide"><div>
     <h2>這幾天在分析 ElasticSearch 結果</h2>
     <ul class="tighter">
       <li>他可以當成一個 RESTful API，餵個字串就會回傳搜尋結果</li>
@@ -211,7 +211,7 @@ loop = asyncio.get_event_loop()
 quote = loop.run_until_complete(quote_simple())</code></pre>
   </div></section>
 
-  <section class="slide"><div>
+  <section id="sync-http-requests" class="slide"><div>
   <h2>本來使用 requests 長這樣</h2>
 <pre class="language-python"><code>
 def quote_block(url='/quote/uniform'):
@@ -379,7 +379,7 @@ def quote_many(num_quotes=1, conn_limit=20):
       </ul>
   </div></section>
 
-  <section class="slide"><div>
+  <section id="progressbar-order-by-completeness" class="slide"><div>
       <h2>如果不考慮原本執行順序的話</h2>
       <p class="tighter">可以考慮用 <a class="pinkoi" href="https://docs.python.org/3.4/library/asyncio-task.html#asyncio.as_completed"><code>asyncio.as_completed(coroutines)</code></a>。<br>
       它會把執行結束的 coroutine 依完成先後丟回對應的 Future</p>
@@ -391,7 +391,7 @@ for i, fut in enumerate(<mark>asyncio.as_completed(coros)</mark>, 1):
     quotes.append(q)</code></pre>
   </div></section>
 
-  <section class="slide"><div>
+  <section id="progressbar-orig-order-way1" class="slide"><div>
       <h2>考慮執行順序的話 - 方法一</h2>
       <p>自己做一個 callback function <code>progress_adder</code> 負責增加 progress</p>
       <pre class="language-python"><code>finished_task_count = 0
@@ -402,7 +402,7 @@ def progress_adder(fut):
         progress.value += 1</code></pre>
   </div></section>
 
-  <section class="slide"><div>
+  <section id="progressbar-orig-order-way1-contd" class="slide"><div>
       <h2>方法一：包成 Task 加上 callback</h2>
 <pre class="language-python"><code>futures = []  # wrap coroutines as Tasks
 for i in range(num_quotes):
@@ -413,7 +413,7 @@ for i in range(num_quotes):
 quotes = yield from (asyncio.gather(*futures))</code></pre>
   </div></section>
 
-  <section class="slide"><div>
+  <section id="progressbar-orig-order-way2" class="slide"><div>
       <h2 class="tighter">方法二：包成 Task 呼叫 .result()</h2>
 <pre class="language-python"><code>futures = [
     asyncio.ensure_future(quote_with_lock(semaphore))
