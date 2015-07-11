@@ -50,10 +50,10 @@ def quote_many(num_quotes=1, conn_limit=20, progress=None, step=10):
     ]
 
     t_start = datetime.today()
-    for ith, coro in enumerate(asyncio.as_completed(futures), 1):
+    for ith, fut in enumerate(asyncio.as_completed(futures), 1):
         if ith % step == 0:
             progress.next()
-        yield from coro
+        yield from fut
     t_end = datetime.today()
     progress.finish()
 
