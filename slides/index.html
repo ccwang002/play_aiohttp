@@ -414,13 +414,13 @@ for i, fut in enumerate(<mark>asyncio.as_completed(coros)</mark>, 1):
 
   <section id="progressbar-orig-order-way1" class="slide"><div>
       <h2>考慮執行順序的話 - 方法一</h2>
-      <p>自己做一個 callback function <code>progress_adder</code> 負責增加 progress</p>
-      <pre class="language-python"><code>finished_task_count = 0
+      <pre class="language-python tighter"><code>done_tasks = 0
 def progress_adder(fut):
-    nonlocal finished_task_count
-    finished_task_count += 1
-    if finished_task_count % step == 0:
+    nonlocal done_tasks
+    done_tasks += 1
+    if done_tasks % step == 0:
         progress.value += 1</code></pre>
+      <p>自己做一個 callback function <code>progress_adder</code> 負責增加 progress</p>
   </div></section>
 
   <section id="progressbar-orig-order-way1-contd" class="slide"><div>
