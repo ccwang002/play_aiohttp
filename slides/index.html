@@ -381,13 +381,13 @@ def quote_many(num_quotes=1, conn_limit=20):
 
   <section class="slide"><div>
       <h2>如果不考慮原本執行順序的話</h2>
-      <p class="tighter">可以考慮用 <code>asyncio.as_completed(coroutines)</code>。<br>
-      它會把執行結束的 coroutine 依完成先後用 iteration 方式丟回來</p>
+      <p class="tighter">可以考慮用 <a class="pinkoi" href="https://docs.python.org/3.4/library/asyncio-task.html#asyncio.as_completed"><code>asyncio.as_completed(coroutines)</code></a>。<br>
+      它會把執行結束的 coroutine 依完成先後丟回對應的 Future</p>
       <pre class="language-python"><code>quotes, step = [], 10
-for i, coro in enumerate(<mark>asyncio.as_completed(coros)</mark>, 1):
+for i, fut in enumerate(<mark>asyncio.as_completed(coros)</mark>, 1):
     if i % step == 0:
         progress.value += 1  # or progress.next()
-    q = yield from coro
+    q = yield from fut  # get the result of future
     quotes.append(q)</code></pre>
   </div></section>
 
@@ -419,10 +419,10 @@ quotes = yield from (asyncio.gather(*futures))</code></pre>
     asyncio.ensure_future(quote_with_lock(semaphore))
     for i in range(num_quotes)
 ]
-for i, coro in enumerate(asyncio.as_completed(futures), 1):
+for i, fut in enumerate(asyncio.as_completed(futures), 1):
     if i % step == 0:
         progress.value += 1
-    yield from coro  # don't store
+    yield from fut  # don't store
 <mark>quotes = [fut.result() for fut in futures]</mark></code></pre>
   </div></section>
 
