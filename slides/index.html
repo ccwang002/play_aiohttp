@@ -270,8 +270,9 @@ quote = <mark>loop.run_until_complete(quote_simple())</mark></code></pre>
   <section id="min-aiohttp-example-explain" class="slide"><div>
       <h2>Coroutine / Task</h2>
       <ul>
-        <li><code>quote_simple()</code> 會回傳一個 coroutine（即可以呼叫 yield from）</li>
-        <li><code>loop.run_until_complete(coro)</code> 會自動把 coroutine 用 <code>Task</code> (subclass of future) 包住</li>
+        <li><code>quote_simple()</code> 會回傳一個 coroutine（可以 yield from 它）</li>
+        <li><code>loop.run_until_complete(coro)</code> 會自動把 coroutine 用 <code>Task</code> (subclass of future) 包住，
+            並丟到 event loop 去執行</li>
         <li><a class="pinkoi" href="https://docs.python.org/3.4/library/asyncio-task.html#asyncio.Task"><code>Task</code></a> 有很多好處：接 callback、看包的 coroutine 有沒有結束、記住回傳值、存 traceback</li>
         <li>例：<code>t = Task(coro); loop.run_until_complete(t)</code><br>能有相同的作用</li>
         <li>好處是 <code>t.result()</code> 能拿到 <code>coro</code> 回傳值</li>
@@ -296,7 +297,7 @@ def quote_many(num_quotes=1):
       <h2 class="tighter">一發不可拾</h2>
       <ul class="tighter">
         <li><code>loop.run_until_complete(quote_many(2000))</code><br>表示一口氣發了 2000 個 request，會把人家打壞掉……</li>
-        <li>如果 server 沒調整，在那之前其實會先出現 <strong>ClientOSError</strong></li>
+        <li>如果電腦沒調整，在那之前會先出現 <strong>ClientOSError</strong></li>
         <li>Port 會先不夠用 <code>netstat -apn | grep 9527</code></li>
       </ul>
       <pre class="medium"><code>tcp 0 0   127.0.0.1:5566    127.0.0.1:45236  ESTABLISHED 5991/python
@@ -312,8 +313,8 @@ tcp 0 0   127.0.0.1:44741   127.0.0.1:5566   <mark>TIME_WAIT</mark>   -</code></
       <h2>Cont'd</h2>
       <ul>
         <li>請參考<a href="http://vincent.bernat.im/en/blog/2014-tcp-time-wait-state-linux.html">詳細說明</a>和<a href="http://translate.google.com.tw/translate?hl=en&sl=ja&u=http://qiita.com/kuni-nakaji/items/c07004c7d9e5bb683bc2&prev=search">相關文章</a>調整 sysctl.conf 連線設定</li>
+        <li>實際上跑得很慢，2000 reqs (1 req = 0.5 sec) 需要 4.66 sec</li>
         <li>很明顯地這沒有解決問題</li>
-        <li>而且實際上跑得很慢，2000 reqs (1 req = 0.5 sec) 需要 4.66 sec</li>
         <li>就跟 multithreading 一樣，要<del>加裝拘束器</del>連線限制</li>
         <li>aiohttp 其實可以設定 connection pool limit，但這莫名一直炸 / 噴 Exception。重點最後還是很慢，需要 3.94 sec</li>
         <li class="next">自己寫。使用 <a class="pinkoi" href="https://docs.python.org/3.4/library/asyncio-sync.html#asyncio.Semaphore"><code>asyncio.Semaphore</code></a> （<a href="https://en.wikipedia.org/wiki/Semaphore_%28programming%29">維基說明</a>）</li>
@@ -331,13 +332,13 @@ def quote_simple(url='/quote/uniform'):
 
   <section id="multi-coro-lock-example" class="slide"><div>
       <h2>Coroutine with Semaphore</h2>
-      <p class="tighter"><code>with ...</code> 進入時 acquire 出來時 release 來控制總連線數</p>
       <pre class="language-python"><code>@asyncio.coroutine
 def quote_with_lock(semaphore, url='/quote/uniform'):
     <mark>with (yield from semaphore):</mark>
         r = yield from aiohttp.request('GET', url)
         quote_json = yield from r.json()
     return quote_json['quote']</code></pre>
+      <p class="tighter"><code>with ...</code> 進入時 acquire，出來時 release 來控制總活動連線數</p>
   </div></section>
 
   <section id="multi-coro-lock-example-contd" class="slide"><div>
@@ -367,7 +368,7 @@ def quote_many(num_quotes=1, conn_limit=20):
   <section id="asyncio-progressbar-cover" class="slide cover w subheader"><div>
       <h2>所以我說那個進<br>度<br>條<br>呢</h2>
       <img src="pics/mid.jpg" alt="">
-      <p class="subtitle">…底下那根一直會動就是潮</p>
+      <p class="subtitle">底下那根東西一直會動就是潮</p>
     </div>
     <style>
       #asyncio-progressbar-cover h2 {
@@ -382,7 +383,7 @@ def quote_many(num_quotes=1, conn_limit=20):
         color: #fff;
         text-shadow: 1px 1px 2px #000;
         bottom: -24px;
-        right: 175px;
+        left: 170px;
       }
     </style>
   </section>
