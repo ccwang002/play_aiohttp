@@ -509,6 +509,53 @@ for i, fut in enumerate(asyncio.as_completed(futures), 1):
   </style>
   </section>
 
+  <section id="appendix-cover" class="slide cover w subheader"><div>
+      <h2>Appendix之<br>我很清楚這些東西沒時間講惹</h2>
+      <img src="pics/mid.jpg" alt="">
+    </div>
+    <style>
+    </style>
+  </section>
+
+  <section id="appendix-python3" class="slide"><div>
+      <h2>Who the X use Python 3?</h2>
+      <ul>
+        <li>Me. And <a href="http://www.i-programmer.info/news/216-python/7179-python-27-to-be-maintained-until-2020.html">everyone else 5 years later</a></li>
+        <li>Yes, all previous code requires Python 3.3+</li>
+        <li>You mentioned <strong>Python 3.5</strong>?<br>
+          <code>async</code> and <code>await</code> usage at <code>3_console_demo_py35.py</code></li>
+        <li>You mentioned <strong>Python 2.7</strong>?<br>
+          Tornado has its own event loop and can replace aiohttp.<br>
+          Alternatively, <a href="https://pypi.python.org/pypi/trollius">Trollius</a> is the asyncio on Python 2. Port is easy.
+        </li>
+      </ul>
+  </div></section>
+
+  <section id="appendix-tornado" class="slide"><div>
+      <h2>The REST server by Tornado</h2>
+      <pre class="language-python3 medium"><code>class RootHandler(tornado.web.RequestHandler):
+    def get(self):
+        response = {'message': 'Big Brother is watch you'}
+        self.write(response)
+        self.finish()
+
+if __name__ == '__main__':
+    app = tornado.web.Application([(r'^/$', RootHandler)])
+    app.listen(5566)  # try curl -s -XGET localhost:5566/
+      </code></pre>
+  </div></section>
+
+  <section id="appendix-tornado-async" class="slide"><div>
+      <h2>Add extra async operations</h2>
+      <p class="tighter">By default, Tornado app <em>already is</em> async.<br>To pause for an extra 0.5 sec before response,</p>
+      <pre class="language-python3 medium"><code>class SlowHandler(RootHandler):
+    @tornado.web.asynchronous
+    @gen.engine
+    def get(self):
+        yield gen.Task(IOLoop.current().add_timeout, time.time() + 0.5)
+        self.finish()  # close the connection</code></pre>
+  </div></section>
+
   <!-- End Slide -->
   <section id='end' class='slide cover shout w'><div>
       <h2>Questions?</h2>
