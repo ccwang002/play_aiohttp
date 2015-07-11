@@ -465,21 +465,68 @@ for i, fut in enumerate(asyncio.as_completed(futures), 1):
       <p><code>step</code> 不要設太小，I/O 高且會拖慢速度（最快約 0.1s 更新一次）</p>
   </div></section>
 
+  <section id="take-home-msg" class="slide"><div>
+      <h2>Take home message</h2>
+      <ul>
+        <li>Aysncio, event loop, and <strong>coroutine</strong> are not <em>that</em> unfriendly</li>
+        <li>ensure_future(coroutine) becomes <strong>Task</strong>, subclass of Future, which gets many goodies like add_done_callback and .result()</li>
+        <li>Multiple concurrent coroutines can be by <strong>gather(*coros)</strong> or <strong>as_completed(coros)</strong> to work simultaneously</li>
+        <li><strong>Semaphore</strong> controls the maximun of active concurrent coroutines</li>
+        <li><a href="http://www.pinkoi.com/about/pinkoist" class="pinkoi"><strong>Pinkoi</strong></a> is awesome</li>
+      </ul>
+  </div></section>
+
+  <section id="pinkoi-hiring" class="slide cover shout"><div>
+      <h2><a href="http://www.pinkoi.com/about/pinkoist"><img src="pics/pinkoi.png" alt="Pinkoi"></a>is hiring</h2>
+      <p class="job">Back-End | QA | Data | Search<br>Front-End | iOS | Android</p>
+  </div>
+  <style>
+    #pinkoi-hiring h2 img {
+      vertical-align: middle;
+      position: relative;
+      height: 2em;
+      margin-right: 0.2em;
+    }
+    #pinkoi-hiring h2 a {
+      background: none;
+    }
+    #pinkoi-hiring h2 {
+      color: #eee;
+      top: 40%;
+    }
+    #pinkoi-hiring p {
+      position: absolute;
+      text-align: right;
+      width: 100%;
+      right: 140px;
+      color: #eee;
+    }
+    #pinkoi-hiring .job {
+      font-size: 34px;
+      line-height: 1.6em;
+      bottom: 16%;
+    }
+  </style>
+  </section>
+
   <!-- End Slide -->
   <section id='end' class='slide cover shout w'><div>
-    <h2>Thank You!</h2>
-    <img src="pics/end.jpg" alt="">
-  </div><style>
-    #end h2 {
-      position: absolute;
-      text-align: left;
-      top: 200px;
-      left: 80px;
-      color: yellow;
-      font-size: 92px;
-      opacity: 0.9;
-    }
-  </style></section>
+      <h2>Questions?</h2>
+      <img src="pics/end.jpg" alt="">
+    </div>
+    <style>
+      #end h2 {
+        position: absolute;
+        text-align: left;
+        top: 180px;
+        left: 130px;
+        color: #D91A3C;
+        text-shadow: 1px 2px 5px #E6F3FF;
+        font-size: 120px;
+        opacity: 0.9;
+      }
+    </style>
+  </section>
 
   <!-- END OF SLIDE CONTENT -->
   <p class="badge"><a href="https://github.com/ccwang002/play_aiohttp" target="_blank">Fork me on Github</a></p>
