@@ -221,7 +221,26 @@ def quote_block(url='/quote/uniform'):
     return quote_json['quote']
 
 
-quote = quote_block()</code>
+quote = quote_block()</code></pre>
+    <div class="sidenote">
+      <h3 class="grey"><strong>Note</strong></h3>
+      <ul>
+        <li>requests 中比較常用 <code>requests.get(...)</code></li>
+        <li>aiohttp 0.17+ 會有對應 <code>aiohttp.get(...)</code></li>
+      </ul>
+    </div>
+    <style>
+      #sync-http-requests .sidenote h3 {
+        font-size: 1.3em;
+      }
+      #sync-http-requests .sidenote {
+        position: absolute;
+        width: 250px;
+        right: 100px;
+        bottom: -20px;
+        font-size: 22px;
+      }
+    </style>
   </div></section>
 
   <section id="min-aiohttp-example-annotated" class="slide"><div>
