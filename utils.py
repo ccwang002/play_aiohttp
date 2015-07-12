@@ -1,5 +1,7 @@
-import colorlog
+from collections import namedtuple
 import logging
+
+import colorlog
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -10,25 +12,39 @@ except ImportError:
     # for pip < 6.0, no fancy progressbar is given
     # We build our own
     class ShadyBar(object):
+        """A simple logging-based progress indicator.
 
-        def __init__(self, *args, **kwargs):
+        Examples
+        --------
+        To create a progress with total 20 increments and show
+        total 5 times of progress,
+
+            >>> bar = ShadyBar(max = 20, n_logs=5)
+            >>> for mytask in range(20):
+            ...     bar.next()
+            >>> bar.finish()
+
+        """
+        def __init__(self, *args, max=100, n_logs=10, **kwargs):
             logger.error('progress bar requires pip 6.0+')
             self.description = ''
             self.index = 0
-            self.max = kwargs.get('max', 100)
+            self.max = max
+            self.step = self.max // n_logs or 1
 
         def next(self, n=1):
             self.index += n
             self.update()
 
         def update(self):
-            step = self.max // 10 or 1
             percentage = self.index / self.max * 100
-            if self.index % step == 0:
+            if self.index % self.step == 0:
                 logger.info('Progess %04.1f%% reached' % percentage)
 
         def finish(self):
             logger.info('Progress done')
+
+
 def colorify_log_handler(
         log_handler, log_lineno=True,
         time_fmt='%y-%m-%d %H:%M:%S', log_fmt=None
