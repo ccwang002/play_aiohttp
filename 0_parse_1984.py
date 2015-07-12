@@ -11,6 +11,7 @@ logger.setLevel(logging.DEBUG)
 
 @asyncio.coroutine
 def get_zip(url):
+    """Read in a zip file as bytes from URL."""
     logger.debug('Downloading %s' % url)
     r = yield from aiohttp.request('get', url)
     if r.status == 200:
@@ -22,6 +23,7 @@ def get_zip(url):
     return None
 
 def read_zip_txt(zip_bytes):
+    """Open zip from bytes and read all its .txt text files."""
     with zipfile.ZipFile(BytesIO(zip_bytes), 'r') as myzip:
         txt_files = [pth for pth in myzip.namelist() if pth.endswith('.txt')]
         for txt_pth in txt_files:
@@ -29,6 +31,21 @@ def read_zip_txt(zip_bytes):
                 yield txt_f.read()
 
 def parse_book(txt):
+    """Parse the Gutenberg book context structure.
+
+    Return
+    ------
+
+        dict[(part, chapter)] --> [paragraph, paragraph, ...]
+
+    Each paragraph does not contain any newline.
+
+
+    Notes
+    -----
+    This ended up as a specific parser for 1984. Many other books don't hold
+    the part-then-chapter book strcuture.
+    """
     start_of_part = re.compile(r'^\s*PART [A-Z]+\s*$').match
     start_of_chapter = re.compile(r'\s*Chapter [0-9]+\s*$').match
     end_of_content = re.compile(r'\s*THE END\s*$').match
