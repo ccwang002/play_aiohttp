@@ -99,6 +99,7 @@
         <li>R / Python</li>
         <li>PyCon APAC 2014-16/TW staff<br>
           We're calling for <strong>reviewers</strong></li>
+        <li>NTU Bioinfo master student</li>
         <li>Former intern at Microsoft Research Asia</li>
         <li>Intern at <strong><a href="http://www.pinkoi.com/about" class="pinkoi">Pinkoi</a></strong></li>
         <li>Happy to chat about bioinfo <del>and anime</del></li>
@@ -141,10 +142,9 @@ with ThreadPoolExecutor(max_workers) as executor:
   <section id="multithread-contd" class="slide"><div>
     <h2>Multithreading 不夠潮</h2>
     <ul>
-      <li>用起來應該不會有什麼問題，<a href="https://docs.python.org/3.4/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor">官網也是用網路爬蟲當例子</a></li>
-      <li>不過身為一個<del>（一直出包）</del>不斷實驗改進的工程師，還蠻常活在 interactive shell / IPython Notebook 裡的</li>
-      <li>我的印象中 multi(threading|processing) 在這情況都不是很好用，<br><a href="https://docs.python.org/3.4/library/multiprocessing.html#using-a-pool-of-workers">有些狀況會噴 error</a>，雖然我是沒有測啦</li>
-      <li>最後就想試一下 event-loop async，多點些技能</li>
+      <li>用起來應該沒問題，<a href="https://docs.python.org/3.4/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor">官網也是用網路爬蟲當例子</a></li>
+      <li>不過身為一個<del>（一直出包）</del>不斷實驗改進的工程師，還蠻常活在 REPL / IPython Notebook 裡，印象中 threading、multiprocessing 在這情況<a href="https://docs.python.org/3.4/library/multiprocessing.html#using-a-pool-of-workers">可能會噴 error</a>（雖然我沒有測啦）</li>
+      <li>廢話這多，總之想試 async，多點些技能</li>
       <li>async 版的 requests 就是 <a href="https://aiohttp.readthedocs.org/en/stable/">aiohttp</a></li>
     </ul>
   </div></section>
@@ -253,6 +253,28 @@ def quote_simple(url='/quote/uniform'):
 
 loop = asyncio.get_event_loop()
 quote = loop.run_until_complete(quote_simple())</code></pre>
+    <div class="sidenote next">
+      <h3 class="grey"><strong>About coroutines</strong></h3>
+      <p class="tighter">Coroutines can be entered, exited, and resumed at many different points</p>
+    </div>
+    <style>
+      #min-aiohttp-example-annotated .sidenote h3 {
+        font-size: 1.2em;
+      }
+      #min-aiohttp-example-annotated .sidenote p {
+        margin-bottom: 5px;
+        line-height: 1.5em;
+      }
+      #min-aiohttp-example-annotated .sidenote {
+        position: absolute;
+        width: 260px;
+        right: 120px;
+        bottom: 120px;
+        font-size: 16px;
+        padding: 0 10px;
+        border: dotted 1px grey;
+      }
+    </style>
   </div></section>
 
   <section id="min-aiohttp-example-loop" class="slide"><div>
@@ -401,7 +423,7 @@ def quote_many(num_quotes=1, conn_limit=20):
   </div></section>
 
   <section id="progressbar-order-by-completeness" class="slide"><div>
-      <h2>如果不考慮原本執行順序的話</h2>
+      <h2>不考慮原本執行順序的話</h2>
       <p class="tighter">可以考慮用 <a class="pinkoi" href="https://docs.python.org/3.4/library/asyncio-task.html#asyncio.as_completed"><code>asyncio.as_completed(coroutines)</code></a>。<br>
       它會把執行結束的 coroutine 依完成先後丟回對應的 Future</p>
       <pre class="language-python"><code>quotes, step = [], 10
@@ -413,7 +435,20 @@ for i, fut in enumerate(<mark>asyncio.as_completed(coros)</mark>, 1):
   </div></section>
 
   <section id="progressbar-orig-order-way1" class="slide"><div>
-      <h2>考慮執行順序的話 - 方法一</h2>
+      <h2>考慮執行順序的話：方法一之<br>包成 Task 呼叫 .result()</h2>
+<pre class="language-python medium"><code>futures = [
+    asyncio.ensure_future(quote_with_lock(semaphore))
+    for i in range(num_quotes)
+]
+for i, fut in enumerate(asyncio.as_completed(futures), 1):
+    if i % step == 0:
+        progress.value += 1
+    yield from fut  # don't store
+<mark>quotes = [fut.result() for fut in futures]</mark></code></pre>
+  </div></section>
+
+  <section id="progressbar-orig-order-way2" class="slide"><div>
+      <h2>方法二之 callback</h2>
       <pre class="language-python tighter"><code>done_tasks = 0
 def progress_adder(fut):
     nonlocal done_tasks
@@ -423,8 +458,8 @@ def progress_adder(fut):
       <p>自己做一個 callback function <code>progress_adder</code> 負責增加 progress</p>
   </div></section>
 
-  <section id="progressbar-orig-order-way1-contd" class="slide"><div>
-      <h2>方法一：包成 Task 加上 callback</h2>
+  <section id="progressbar-orig-order-way2-contd" class="slide"><div>
+      <h2>（續）包成 Task 加上 callback</h2>
 <pre class="language-python"><code>futures = []  # wrap coroutines as Tasks
 for i in range(num_quotes):
     task = asyncio.Task(quote_with_lock(semaphore))
@@ -434,17 +469,25 @@ for i in range(num_quotes):
 quotes = yield from (asyncio.gather(*futures))</code></pre>
   </div></section>
 
-  <section id="progressbar-orig-order-way2" class="slide"><div>
-      <h2 class="tighter">方法二：包成 Task 呼叫 .result()</h2>
-<pre class="language-python"><code>futures = [
-    asyncio.ensure_future(quote_with_lock(semaphore))
-    for i in range(num_quotes)
-]
-for i, fut in enumerate(asyncio.as_completed(futures), 1):
-    if i % step == 0:
-        progress.value += 1
-    yield from fut  # don't store
-<mark>quotes = [fut.result() for fut in futures]</mark></code></pre>
+  <section id="progressbar-orig-order-way2-full" class="slide"><div>
+    <pre class="language-python small full-page"><code>@asyncio.coroutine
+def quote_many(num_quotes, conn_limit, progress, step):
+    semaphore = asyncio.Semaphore(conn_limit)
+    done_tasks = 0
+    def progress_adder(fut):
+        nonlocal done_tasks
+        done_tasks += 1
+        if done_tasks % step == 0:
+            progress.value += 1
+
+    futures = []
+    for i in range(num_quotes):
+        task = asyncio.Task(quote_with_lock(semaphore))
+        <mark>task.add_done_callback(progress_adder)</mark>
+        futures.append(task)
+
+    quotes = yield from (asyncio.gather(*futures))
+    return quotes</code></pre>
   </div></section>
 
   <section id="demo-console" class="slide"><div>
@@ -462,7 +505,7 @@ for i, fut in enumerate(asyncio.as_completed(futures), 1):
         <img src="pics/ipynb_out.gif" alt="IPython Notebook Progressbar Demo" />
         <p>Or view it on <a href="http://gfycat.com/HastySpryAmericanavocet">gfycat</a></p>
       </div>
-      <p><code>step</code> 不要設太小，I/O 高且會拖慢速度（最快約 0.1s 更新一次）</p>
+      <p><code>step</code> 設太小，I/O 高且會拖慢速度（最快不超過 0.1s 更新一次）</p>
   </div></section>
 
   <section id="take-home-msg" class="slide"><div>
@@ -472,7 +515,6 @@ for i, fut in enumerate(asyncio.as_completed(futures), 1):
         <li>ensure_future(coroutine) becomes <strong>Task</strong>, subclass of Future, which gets many goodies like add_done_callback and .result()</li>
         <li>Multiple concurrent coroutines can be by <strong>gather(*coros)</strong> or <strong>as_completed(coros)</strong> to work simultaneously</li>
         <li><strong>Semaphore</strong> controls the maximun of active concurrent coroutines</li>
-        <li><a href="http://www.pinkoi.com/about/pinkoist" class="pinkoi"><strong>Pinkoi</strong></a> is awesome</li>
       </ul>
   </div></section>
 
@@ -542,7 +584,7 @@ for i, fut in enumerate(asyncio.as_completed(futures), 1):
       <h2>The REST server by Tornado</h2>
       <pre class="language-python3 medium"><code>class RootHandler(tornado.web.RequestHandler):
     def get(self):
-        response = {'message': 'Big Brother is watch you'}
+        response = {'message': 'Big Brother is watching you'}
         self.write(response)
         self.finish()
 
