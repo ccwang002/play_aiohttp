@@ -4,18 +4,21 @@ Notes
 -----
 More tornado async usage at https://gist.github.com/lbolla/3826189
 """
+from collections import namedtuple
 import itertools
 import logging
 import operator
 import pickle
 import random
+import time
+
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado import gen
 import tornado.log
 from tornado.options import define, options, parse_command_line
 import tornado.web
-import time
+
 
 __version__ = '2015.7'
 
@@ -28,6 +31,8 @@ define("pickle_pth", default='parsed_1984.pkl',
 logger = logging.getLogger('random_quote_app')
 logger.setLevel(logging.DEBUG)
 
+
+Paragraph = namedtuple('Paragraph', ['part', 'chapter', 'content'])
 
 class Application(tornado.web.Application):
     def __init__(self, *args, **kwargs):
@@ -86,30 +91,31 @@ class RandomQuoteHandler(BaseHandler):
 
         If slow is given, wait an extra 0.5 second.
         '''
-        self.response()
+        rand_quote = self.quote()
         if self.get_argument('slow', False):
             yield gen.Task(IOLoop.current().add_timeout, time.time() + 0.5)
+        self.write({
+            'quote': rand_quote.content,
+            'source': {
+                'part': rand_quote.part,
+                'chapter': rand_quote.chapter,
+            },
+        })
         self.finish()
 
-    def response(self):
+    def quote(self):
         effective_chapters = self.draw_chapter()
         rand_chp = random.choice(effective_chapters)
         rand_quote = random.choice(self.quotes[rand_chp])
-        self.write({
-            'quote': rand_quote,
-            'source': {
-                'part': rand_chp[0],
-                'chapter': rand_chp[1],
-            },
-        })
+        return rand_quote
 
     def draw_chapter(self):
         part = self.get_argument('part', None)
         chapter = self.get_argument('chapter', None)
 
         try:
-            part = int(part) if part is not None else part
-            chapter = int(chapter) if chapter is not None else chapter
+            part = part and int(part)
+            chapter = chapter and int(chapter)
         except ValueError:
             raise tornado.web.HTTPError(
                 400,
@@ -141,9 +147,7 @@ class RandomQuoteUniformHandler(RandomQuoteHandler):
             operator.itemgetter(*effective_chapters)(self.quotes)
         ))
         rand_quote = random.choice(effecitve_quotes)
-        self.write({
-            'quote': rand_quote,
-        })
+        return rand_quote
 
 
 def main():

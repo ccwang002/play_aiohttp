@@ -1,13 +1,18 @@
-import aiohttp
 import asyncio
+from collections import namedtuple
 from io import BytesIO, TextIOWrapper
+import itertools
 import logging
 import pickle
 import re
 import zipfile
 
+import aiohttp
+
 logger = logging.getLogger('parse_1984')
 logger.setLevel(logging.DEBUG)
+
+Paragraph = namedtuple('Paragraph', ['part', 'chapter', 'content'])
 
 @asyncio.coroutine
 def get_zip(url):
@@ -52,39 +57,30 @@ def parse_book(txt):
 
     cur_part = 0
     cur_chapter = 0
-    chapters = {}
+    paragraphs = []
 
     for line in txt.split('\n\n'):
         if start_of_part(line):
             if cur_part == 0:
                 logger.info('Start reading the book')
-                chapter_paragraphs = []
             else:
-                # close last chapter of the last part
-                chapters[(cur_part, cur_chapter)] = chapter_paragraphs
-                chapter_paragraphs = []
                 logger.debug('Closing part %d with %d chapters' %
                              (cur_part, cur_chapter))
             cur_part += 1
             cur_chapter = 0
         elif start_of_chapter(line):
-            if cur_chapter > 0:
-                # sotre the chapter's paragraphs
-                chapters[(cur_part, cur_chapter)] = chapter_paragraphs
-                chapter_paragraphs = []
             cur_chapter += 1
         elif end_of_content(line):
             # the final chapter of the final part
             # Yes, we skipped the APPENDIX
-            chapters[(cur_part, cur_chapter)] = chapter_paragraphs
             logger.debug('Closing part %d with %d chpaters' %
                          (cur_part, cur_chapter))
             logger.info('Book ends')
             break
         elif cur_part > 0 and line:
-            chapter_paragraphs.append(line.replace('\n', ' '))
-
-    return chapters
+            p = Paragraph(cur_part, cur_chapter, line.replace('\n', ' '))
+            paragraphs.append(p)
+    return paragraphs
 
 
 def main():
@@ -100,15 +96,26 @@ def main():
     txt_1984 = next(read_zip_txt(r))
 
     logger.info('Parsing the book')
-    chapters = parse_book(txt_1984)
-    logger.info('Total %d chapters' % len(chapters))
-    logger.debug('with chapters: %s ' % ', '.join(map(str, sorted(chapters))))
-    logger.debug('Total paragraphs: %d' % sum(map(len, chapters.values())))
+    paragraphs = parse_book(txt_1984)
+
+    # Group paragraphs into dict of chapters
+    def group_by_chapter(p):
+        return p.part, p.chapter
+
+    quotes = {}
+    for key, grp in itertools.groupby(paragraphs, key=group_by_chapter):
+        quotes[key] = list(grp)
+
+    # Collecting statistics
+    logger.info('Total %d chapters' % len(quotes.keys()))
+    logger.debug('with chapters: %s ' %
+                 ', '.join(map(str, sorted(quotes.keys()))))
+    logger.debug('Total paragraphs: %d' % len(paragraphs))
 
     out_pickle_pth = './parsed_1984.pkl'
     logger.info('Exported to pickle %s' % out_pickle_pth)
     with open(out_pickle_pth, 'wb') as f:
-        pickle.dump(chapters, f)
+        pickle.dump(quotes, f)
 
     logger.info('Program ends')
 
