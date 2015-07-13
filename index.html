@@ -127,8 +127,8 @@
   </div></section>
 
   <section id="multithread" class="slide"><div>
-    <pre class="language-python tighter">
-<code>from concurrent.futures import ThreadPoolExecutor
+      <pre class="language-python tighter">
+        <code>from concurrent.futures import ThreadPoolExecutor
 
 def search(query, url='/search'):
     r = requests.request('GET', url, params={'q': query})
@@ -136,8 +136,26 @@ def search(query, url='/search'):
     return quote_json
 
 with ThreadPoolExecutor(max_workers) as executor:
-    results = executor.map(search, all_queries)</code></pre>
-  </div></section>
+    results = executor.map(search, all_queries)</code>
+      </pre>
+      <div class="sidenote grey">
+        <p>For Python 2.7, <a class="grey" href="https://pypi.python.org/pypi/futures">futures</a> is the backport package for concurrent.futures</p>
+      </div>
+    </div>
+    <style>
+    #multithread .sidenote h3 {
+      font-size: 1.3em;
+    }
+    #multithread .sidenote {
+      position: absolute;
+      width: 360px;
+      right: 80px;
+      top: 145px;
+      line-height: 1.5em;
+      font-size: 20px;
+    }
+    </style>
+  </section>
 
   <section id="multithread-contd" class="slide"><div>
     <h2>Multithreading 不夠潮</h2>
@@ -166,7 +184,7 @@ with ThreadPoolExecutor(max_workers) as executor:
   </div></section>
 
   <section id="scene" class="slide"><div>
-    <h2>情境（有空再補充）</h2>
+    <h2>情境測試：Random Quoter</h2>
     <ul class="tighter">
       <li>用 Tornado 寫了個 server （用它自己的 event loop）</li>
       <li><code>http://localhost:5566/quote</code> 就會回傳 1984 隨機段落<br>
@@ -178,8 +196,7 @@ with ThreadPoolExecutor(max_workers) as executor:
 python random_quote_app.py [--help|--num_process=1]</code></pre>
   </div></section>
 
-<!--"'In memory. Very well, then. We, the Party, control all records, and we
-    control all memories. Then we control the past, do we not?'" part3 chp2-->
+<!--",  Then we control the past, do we not?'" part3 chp2-->
   <section id="scene-in-action" class="slide"><div>
     <p class="tighter">用起來大概像這樣</p>
     <pre class="medium language-bash"><code class="language-bash">$ curl -s -XGET "http://localhost:5566/quote" | \
@@ -194,6 +211,22 @@ python random_quote_app.py [--help|--num_process=1]</code></pre>
 }</code></pre>
   </div></section>
 
+  <section id="scene-in-action-slow" class="slide"><div>
+    <pre class="medium language-bash"><code class="language-bash">
+$ curl -s -XGET "localhost:5566/quote/uniform<mark>?slow=true&amp;part=3</mark>"
+# pause for 500ms then return
+{
+    "quote": "'In memory. Very well, then. We, the Party,
+              control all records, and we control all memories.
+              Then we control the past, do we not?'",
+    "source": {
+        "chapter": 2,
+        "part": 3
+    }
+}</code></pre>
+
+
+  </div></section>
   <section id="asyncio-basic-cover" class="slide cover w subheader"><div>
       <h2>Asycnio (http)<br>Basics</h2>
       <img src="pics/mid.jpg" alt="">
@@ -210,6 +243,28 @@ def quote_simple(url='/quote/uniform'):
 
 loop = asyncio.get_event_loop()
 quote = loop.run_until_complete(quote_simple())</code></pre>
+    <div class="sidenote next">
+      <h3 class="grey"><strong>About coroutines</strong></h3>
+      <p class="tighter">Coroutines can be entered, exited, and resumed <strong>at many different points</strong></p>
+    </div>
+    <style>
+      #min-aiohttp-example .sidenote h3 {
+        font-size: 1.2em;
+      }
+      #min-aiohttp-example .sidenote p {
+        margin-bottom: 5px;
+        line-height: 1.5em;
+      }
+      #min-aiohttp-example .sidenote {
+        position: absolute;
+        width: 260px;
+        right: 120px;
+        bottom: 120px;
+        font-size: 16px;
+        padding: 0 10px;
+        border: dotted 1px grey;
+      }
+    </style>
   </div></section>
 
   <section id="sync-http-requests" class="slide"><div>
@@ -253,28 +308,6 @@ def quote_simple(url='/quote/uniform'):
 
 loop = asyncio.get_event_loop()
 quote = loop.run_until_complete(quote_simple())</code></pre>
-    <div class="sidenote next">
-      <h3 class="grey"><strong>About coroutines</strong></h3>
-      <p class="tighter">Coroutines can be entered, exited, and resumed at many different points</p>
-    </div>
-    <style>
-      #min-aiohttp-example-annotated .sidenote h3 {
-        font-size: 1.2em;
-      }
-      #min-aiohttp-example-annotated .sidenote p {
-        margin-bottom: 5px;
-        line-height: 1.5em;
-      }
-      #min-aiohttp-example-annotated .sidenote {
-        position: absolute;
-        width: 260px;
-        right: 120px;
-        bottom: 120px;
-        font-size: 16px;
-        padding: 0 10px;
-        border: dotted 1px grey;
-      }
-    </style>
   </div></section>
 
   <section id="min-aiohttp-example-loop" class="slide"><div>
