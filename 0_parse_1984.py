@@ -86,7 +86,7 @@ def parse_book(txt):
 def main():
     zip_1984_url = 'http://gutenberg.net.au/ebooks01/0100021.zip'
 
-    logger.info('Downloading 1874 from %s' % zip_1984_url)
+    logger.info('Downloading 1984 from %s' % zip_1984_url)
     logger.info('A reading-friendly version is available at %s' %
                 'https://ebooks.adelaide.edu.au/o/orwell/george/o79n/')
     loop = asyncio.get_event_loop()
